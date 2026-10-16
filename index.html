@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head <link rel="stylesheet" href="style.css">>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            margin: 30px;
+        }
+
+        h1 {    
+            text-align: center;
+            color: #243b55;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #2563eb;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: #243b55;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f2f4f8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Student Management System</h1>
+
+        <h3>Add Student</h3>
+
+        <form id="studentForm">
+            <input type="text" id="studentId"
+                   placeholder="Student ID" required>
+
+            <input type="text" id="name"
+                   placeholder="Student Name" required>
+
+            <input type="text" id="course"
+                   placeholder="Course" required>
+
+            <input type="number" id="marks"
+                   placeholder="Marks (0-100)"
+                   min="0" max="100" required>
+
+            <button type="submit">Add Student</button>
+        </form>
+
+        <h3>Student Records</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Course</th>
+                    <th>Marks</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="studentTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Get students from localStorage
+        let students = JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
+
+        // Display all students
+        function displayStudents() {
+            const table = document.getElementById("studentTable");
+            table.innerHTML = "";
+
+            students.forEach(function(student, index) {
+                const row = document.createElement("tr");
+
+                [
+                    student.studentId,
+                    student.name,
+                    student.course,
+                    student.marks
+                ].forEach(function(value) {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+
+                const actionCell = document.createElement("td");
+                const deleteButton = document.createElement("button");
+
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-btn";
+
+                deleteButton.onclick = function() {
+                    deleteStudent(index);
+                };
+
+                actionCell.appendChild(deleteButton);
+                row.appendChild(actionCell);
+                table.appendChild(row);
+            });
+        }
+
+        // Save students to localStorage
+        function saveStudents() {
+            localStorage.setItem(
+                "students",
+                JSON.stringify(students)
+            );
+        }
+
+        // Add a student
+        document.getElementById("studentForm")
+            .addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                const studentId =
+                    document.getElementById("studentId").value.trim();
+                const name =
+                    document.getElementById("name").value.trim();
+                const course =
+                    document.getElementById("course").value.trim();
+                const marks =
+                    Number(document.getElementById("marks").value);
+
+                if (!studentId || !name || !course ||
+                    document.getElementById("marks").value === "" ||
+                    marks < 0 || marks > 100) {
+                    alert("Enter valid student details and marks.");
+                    return;
+                }
+
+                if (students.some(s => s.studentId === studentId)) {
+                    alert("Student ID already exists!");
+                    return;
+                }
+
+                const student = {
+                    studentId: studentId,
+                    name: name,
+                    course: course,
+                    marks: marks
+                };
+
+                students.push(student);
+
+                saveStudents();
+                displayStudents();
+
+                document.getElementById("studentForm").reset();
+            });
+
+        // Delete a student
+        function deleteStudent(index) {
+            students.splice(index, 1);
+            saveStudents();
+            displayStudents();
+        }
+
+        // Display saved records when the page loads
+        displayStudents();
+    </script>
+</body>
+</html>
